@@ -1,0 +1,34 @@
+# Node modules
+node_modules/
+frontend/node_modules/
+localaid-backend/node_modules/
+localaid-frontend/node_modules/
+
+# Environment variables
+.env
+frontend/.env
+localaid-backend/.env
+localaid-frontend/.env
+
+# Uploaded files (avatars, etc.)
+localaid-backend/uploads/
+uploads/
+
+# Build output
+dist/
+build/
+frontend/dist/
+frontend/build/
+
+# Vite/React cache
+frontend/.vite/
+frontend/.cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log* 
