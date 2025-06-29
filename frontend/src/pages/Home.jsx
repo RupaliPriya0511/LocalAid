@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Box, Grid, Dialog, Alert, Container, Fade, Paper, Typography, useTheme, CircularProgress } from '@mui/material';
+import { Box, Grid, Dialog, Alert, Container, Fade, Paper, Typography, useTheme, CircularProgress, Snackbar } from '@mui/material';
 import Header from '../components/Header';
 import FilterBar from '../components/FilterBar';
 import ActionButtons from '../components/ActionButtons';
@@ -31,6 +31,7 @@ export default function Home({ user, socket }) {
   const [sortOrder, setSortOrder] = useState('latest');
   const [searchQuery, setSearchQuery] = useState("");
   const [userState, setUserState] = useState(user);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   // Define fetchPosts at the top level so it is available everywhere
   const fetchPosts = async () => {
@@ -42,11 +43,12 @@ export default function Home({ user, socket }) {
       }
       const res = await axios.get(url);
       setPosts(res.data);
-      setLoading(false);
+      setError(null);
     } catch (err) {
       setError('Failed to fetch posts');
-      setLoading(false);
       console.error('Error fetching posts:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -101,8 +103,9 @@ export default function Home({ user, socket }) {
   };
 
   const handlePostCreated = (newPost) => {
-    setPosts([newPost, ...posts]);
+    setPosts(prevPosts => [newPost, ...prevPosts]);
     setFormOpen(false);
+    setSnackbar({ open: true, message: 'Post created successfully!', severity: 'success' });
   };
 
   // Handler for notification click to open chat
@@ -143,7 +146,7 @@ export default function Home({ user, socket }) {
   // These handlers will be passed to ActionButtons
   const handleRequestHelp = () => {
     if (!user) {
-      alert('Please log in to create a post');
+      setSnackbar({ open: true, message: 'Please log in to create a post', severity: 'warning' });
       return;
     }
     setFormType('Help');
@@ -152,7 +155,7 @@ export default function Home({ user, socket }) {
 
   const handleOfferService = () => {
     if (!user) {
-      alert('Please log in to create a post');
+      setSnackbar({ open: true, message: 'Please log in to create a post', severity: 'warning' });
       return;
     }
     setFormType('Service');
@@ -161,7 +164,7 @@ export default function Home({ user, socket }) {
 
   const handlePostAlert = () => {
     if (!user) {
-      alert('Please log in to create a post');
+      setSnackbar({ open: true, message: 'Please log in to create a post', severity: 'warning' });
       return;
     }
     setFormType('Alert');
@@ -198,28 +201,38 @@ export default function Home({ user, socket }) {
     return true;
   });
 
-  // Sorting
+  // Sorting logic
   const sortedPosts = [...filteredPosts].sort((a, b) => {
     if (sortOrder === 'latest') {
       return new Date(b.time) - new Date(a.time);
     } else if (sortOrder === 'nearest') {
-      return (a.distance || 0) - (b.distance || 0);
+      return (a.distance || Infinity) - (b.distance || Infinity);
     }
     return 0;
   });
 
+  // Get user's posts for sidebar - this will automatically update when posts state changes
   const myPosts = posts.filter(post => {
     if (!user) return false;
     if (typeof post.user === 'object') {
-      return (user._id && post.user._id === user._id) || (user.name && post.user.name === user.name);
+      if (user._id && post.user._id === user._id) return true;
+      if (user.name && post.user.name === user.name) return true;
     } else {
-      return post.user === user.name || post.user === user;
+      if (post.user === user.name || post.user === user) return true;
     }
+    return false;
   });
 
   const handleDeletePost = async (postId) => {
-    await axios.delete(`http://localhost:5000/api/posts/${postId}`);
-    fetchPosts();
+    try {
+      await axios.delete(`http://localhost:5000/api/posts/${postId}`);
+      // Update posts state immediately without refetching
+      setPosts(prevPosts => prevPosts.filter(post => post._id !== postId));
+      setSnackbar({ open: true, message: 'Post deleted successfully!', severity: 'success' });
+    } catch (err) {
+      console.error('Error deleting post:', err);
+      setSnackbar({ open: true, message: 'Failed to delete post', severity: 'error' });
+    }
   };
 
   // Utility to normalize avatar URL (keep in sync with App.jsx)
@@ -242,17 +255,56 @@ export default function Home({ user, socket }) {
       const normalized = normalizeUserAvatar(res.data);
       setUserState(normalized);
       localStorage.setItem('user', JSON.stringify(normalized));
+      setSnackbar({ open: true, message: 'Profile updated successfully!', severity: 'success' });
     } catch (err) {
-      alert('Failed to update profile.');
+      setSnackbar({ open: true, message: 'Failed to update profile', severity: 'error' });
     }
   };
 
+  // Enhanced socket event handling
   useEffect(() => {
     if (!socket) return;
-    const handleUpdate = () => fetchPosts();
+    
+    const handleUpdate = () => {
+      console.log('Socket update received, refetching posts...');
+      fetchPosts();
+    };
+    
+    const handlePostCreated = (newPost) => {
+      console.log('New post created via socket:', newPost);
+      setPosts(prevPosts => [newPost, ...prevPosts]);
+    };
+    
+    const handlePostUpdated = (updatedPost) => {
+      console.log('Post updated via socket:', updatedPost);
+      setPosts(prevPosts => 
+        prevPosts.map(post => 
+          post._id === updatedPost._id ? updatedPost : post
+        )
+      );
+    };
+    
+    const handlePostDeleted = (postId) => {
+      console.log('Post deleted via socket:', postId);
+      setPosts(prevPosts => prevPosts.filter(post => post._id !== postId));
+    };
+
     socket.on('postsUpdated', handleUpdate);
-    return () => socket.off('postsUpdated', handleUpdate);
+    socket.on('postCreated', handlePostCreated);
+    socket.on('postUpdated', handlePostUpdated);
+    socket.on('postDeleted', handlePostDeleted);
+    
+    return () => {
+      socket.off('postsUpdated', handleUpdate);
+      socket.off('postCreated', handlePostCreated);
+      socket.off('postUpdated', handlePostUpdated);
+      socket.off('postDeleted', handlePostDeleted);
+    };
   }, [socket]);
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
 
   if (loading) {
     return (
@@ -287,19 +339,19 @@ export default function Home({ user, socket }) {
       transition: 'all 0.3s ease-in-out'
     }}>
       <Header user={userState} socket={socket} onNotificationAction={handleNotificationAction} />
-      <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Grid container columns={12} spacing={3}>
-          <Grid gridColumn={{ xs: 'span 12', md: 'span 3' }}>
+      <Container maxWidth="xl" sx={{ py: { xs: 2, md: 4 } }}>
+        <Grid container columns={12} spacing={{ xs: 2, md: 3 }}>
+          <Grid gridColumn={{ xs: 'span 12', lg: 'span 3' }}>
             <ProfileSidebar user={userState} stats={{ posts: posts.length, responses: 0 }} posts={myPosts} onDeletePost={handleDeletePost} onEditProfile={handleEditProfile} />
           </Grid>
-          <Grid gridColumn={{ xs: 'span 12', md: 'span 9' }}>
+          <Grid gridColumn={{ xs: 'span 12', lg: 'span 9' }}>
             <Fade in={true} timeout={800}>
               <Box>
                 {locationError && (
                   <Alert 
                     severity="warning" 
                     sx={{ 
-                      mb: 3,
+                      mb: { xs: 2, md: 3 },
                       borderRadius: 2,
                       boxShadow: 1,
                       '& .MuiAlert-icon': {
@@ -314,8 +366,8 @@ export default function Home({ user, socket }) {
                 <Paper 
                   elevation={0}
                   sx={{ 
-                    p: 3, 
-                    mb: 4, 
+                    p: { xs: 2, md: 3 }, 
+                    mb: { xs: 2, md: 4 }, 
                     borderRadius: 2,
                     bgcolor: 'background.paper',
                     boxShadow: '0 2px 12px 0 rgba(0,0,0,0.05)'
@@ -331,8 +383,8 @@ export default function Home({ user, socket }) {
                 <Paper 
                   elevation={0}
                   sx={{ 
-                    p: 2, 
-                    mb: 4, 
+                    p: { xs: 1, md: 2 }, 
+                    mb: { xs: 2, md: 4 }, 
                     borderRadius: 2,
                     bgcolor: 'background.paper',
                     boxShadow: '0 2px 12px 0 rgba(0,0,0,0.05)'
@@ -341,9 +393,9 @@ export default function Home({ user, socket }) {
                   <FilterBar tab={tab} setTab={setTab} distance={distance} setDistance={setDistance} sortOrder={sortOrder} setSortOrder={setSortOrder} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
                 </Paper>
 
-                <Grid container spacing={3}>
+                <Grid container spacing={{ xs: 2, md: 3 }}>
                   {sortedPosts.map((post, index) => (
-                    <Grid key={post._id} gridColumn={{ xs: 'span 12', sm: 'span 6', md: 'span 4' }}>
+                    <Grid key={post._id} gridColumn={{ xs: 'span 12', sm: 'span 6', lg: 'span 4' }}>
                       <Fade in={true} timeout={500} style={{ transitionDelay: `${index * 100}ms` }}>
                         <Box>
                           <PostCard
@@ -353,7 +405,10 @@ export default function Home({ user, socket }) {
                             onAvatarClick={handleAvatarClick}
                             currentUser={userState}
                             socket={socket}
-                            onPostUpdate={fetchPosts}
+                            onPostUpdate={() => {
+                              // Update specific post in state
+                              fetchPosts();
+                            }}
                           />
                         </Box>
                       </Fade>
@@ -411,6 +466,17 @@ export default function Home({ user, socket }) {
           </Grid>
         </Grid>
       </Container>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

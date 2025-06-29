@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, Avatar, Typography, Box, Divider, Button, List, ListItem, ListItemText, IconButton, Chip, Tooltip, Snackbar, Alert, Badge, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
+import { Card, Avatar, Typography, Box, Divider, Button, List, ListItem, ListItemText, IconButton, Chip, Tooltip, Badge, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import axios from 'axios';
@@ -17,17 +17,22 @@ const getAvatarUrl = (avatar) => {
 };
 
 export default function ProfileSidebar({ user, stats, posts, onDeletePost, onEditProfile }) {
-  const [showSnackbar, setShowSnackbar] = useState(false);
-  const [snackbarMsg, setSnackbarMsg] = useState('');
   const [editOpen, setEditOpen] = useState(false);
   const [editFields, setEditFields] = useState({ name: user?.name || '', locationName: user?.locationName || '', avatar: user?.avatar || '' });
   const [avatarPreview, setAvatarPreview] = useState(user?.avatar || '');
   const [uploading, setUploading] = useState(false);
+  const [deletingPost, setDeletingPost] = useState(null);
 
   const handleDelete = async (id) => {
-    await onDeletePost(id);
-    setSnackbarMsg('Post deleted!');
-    setShowSnackbar(true);
+    try {
+      setDeletingPost(id);
+      await onDeletePost(id);
+      // The parent component will handle the state update and show snackbar
+    } catch (err) {
+      console.error('Error deleting post:', err);
+    } finally {
+      setDeletingPost(null);
+    }
   };
 
   const handleEditOpen = () => {
@@ -49,7 +54,7 @@ export default function ProfileSidebar({ user, stats, posts, onDeletePost, onEdi
         setAvatarPreview(`http://localhost:5000${res.data.avatar}`);
         setEditFields(f => ({ ...f, avatar: res.data.avatar }));
       } catch (err) {
-        // Optionally show error
+        console.error('Error uploading avatar:', err);
       }
       setUploading(false);
     }
@@ -58,8 +63,6 @@ export default function ProfileSidebar({ user, stats, posts, onDeletePost, onEdi
   const handleEditSave = () => {
     if (onEditProfile) onEditProfile(editFields);
     setEditOpen(false);
-    setSnackbarMsg('Profile updated!');
-    setShowSnackbar(true);
   };
 
   if (!user) return null;
@@ -105,7 +108,7 @@ export default function ProfileSidebar({ user, stats, posts, onDeletePost, onEdi
         <Divider sx={{ my: 2, width: '100%' }} />
         <Box display="flex" justifyContent="space-between" width="100%" mb={1}>
           <Box textAlign="center">
-            <Typography variant="subtitle2" fontWeight="bold">{stats?.posts ?? 0}</Typography>
+            <Typography variant="subtitle2" fontWeight="bold">{posts?.length ?? 0}</Typography>
             <Typography variant="caption" color="text.secondary">Posts</Typography>
           </Box>
           <Box textAlign="center">
@@ -130,7 +133,18 @@ export default function ProfileSidebar({ user, stats, posts, onDeletePost, onEdi
               }}
                 secondaryAction={
                   <Tooltip title="Delete this post">
-                    <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(post._id)} size="small" sx={{ color: 'error.main', '&:hover': { bgcolor: '#ffebee' } }}>
+                    <IconButton 
+                      edge="end" 
+                      aria-label="delete" 
+                      onClick={() => handleDelete(post._id)} 
+                      size="small" 
+                      disabled={deletingPost === post._id}
+                      sx={{ 
+                        color: 'error.main', 
+                        '&:hover': { bgcolor: '#ffebee' },
+                        '&:disabled': { opacity: 0.6 }
+                      }}
+                    >
                       <DeleteIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
@@ -153,11 +167,6 @@ export default function ProfileSidebar({ user, stats, posts, onDeletePost, onEdi
           </List>
         </Box>
       )}
-      <Snackbar open={showSnackbar} autoHideDuration={2500} onClose={() => setShowSnackbar(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
-        <Alert onClose={() => setShowSnackbar(false)} severity="success" sx={{ width: '100%' }}>
-          {snackbarMsg}
-        </Alert>
-      </Snackbar>
       <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="xs" fullWidth>
         <DialogTitle>Edit Profile</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, py: 2 }}>

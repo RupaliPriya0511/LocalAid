@@ -158,8 +158,12 @@ export default function PostCard({ post, onMessage, onHelpersClick, onAvatarClic
                 size="small"
                 sx={{ ml: 1, height: 32, borderRadius: 2, minWidth: 64, px: 2, textTransform: 'none', fontWeight: 600 }}
                 onClick={async () => {
-                  await axios.patch(`http://localhost:5000/api/posts/${post._id}/status`, { status: 'closed' });
-                  if (typeof onPostUpdate === 'function') onPostUpdate();
+                  try {
+                    await axios.patch(`http://localhost:5000/api/posts/${post._id}/status`, { status: 'closed' });
+                    if (typeof onPostUpdate === 'function') onPostUpdate();
+                  } catch (err) {
+                    console.error('Error closing post:', err);
+                  }
                 }}
               >
                 Close
@@ -174,8 +178,12 @@ export default function PostCard({ post, onMessage, onHelpersClick, onAvatarClic
                 size="small"
                 sx={{ ml: 1, height: 32, borderRadius: 2, minWidth: 64, px: 2, textTransform: 'none', fontWeight: 600 }}
                 onClick={async () => {
-                  await axios.patch(`http://localhost:5000/api/posts/${post._id}/status`, { status: 'open' });
-                  if (typeof onPostUpdate === 'function') onPostUpdate();
+                  try {
+                    await axios.patch(`http://localhost:5000/api/posts/${post._id}/status`, { status: 'open' });
+                    if (typeof onPostUpdate === 'function') onPostUpdate();
+                  } catch (err) {
+                    console.error('Error reopening post:', err);
+                  }
                 }}
               >
                 Reopen

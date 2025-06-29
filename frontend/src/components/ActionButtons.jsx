@@ -19,7 +19,7 @@
 // }
 
 import React from 'react';
-import { Box, Button, useTheme, alpha } from '@mui/material';
+import { Box, Button, useTheme, alpha, useMediaQuery } from '@mui/material';
 import {
   Add as AddIcon,
   VolunteerActivism as HelpIcon,
@@ -29,13 +29,17 @@ import {
 
 export default function ActionButtons({ onRequestHelp, onOfferService, onPostAlert }) {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const buttonStyles = {
-    flex: 1,
-    py: 1.5,
+    flex: isSmallMobile ? 'none' : 1,
+    py: isSmallMobile ? 1 : 1.5,
+    px: isSmallMobile ? 1 : 2,
     borderRadius: 2,
     textTransform: 'none',
     fontWeight: 'bold',
+    fontSize: isSmallMobile ? '0.75rem' : '0.875rem',
     transition: 'all 0.3s ease-in-out',
     '&:hover': {
       transform: 'translateY(-2px)',
@@ -43,7 +47,12 @@ export default function ActionButtons({ onRequestHelp, onOfferService, onPostAle
   };
 
   return (
-    <Box sx={{ display: 'flex', gap: 2 }}>
+    <Box sx={{ 
+      display: 'flex', 
+      gap: isSmallMobile ? 1 : 2,
+      flexDirection: isSmallMobile ? 'column' : 'row',
+      width: '100%'
+    }}>
       <Button
         variant="contained"
         startIcon={<HelpIcon />}

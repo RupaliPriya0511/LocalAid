@@ -101,10 +101,32 @@ function App() {
 
   useEffect(() => {
     if (user) {
-      const newSocket = io('http://localhost:5000');
+      const newSocket = io('http://localhost:5000', {
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+        timeout: 20000
+      });
+
+      newSocket.on('connect', () => {
+        console.log('Socket connected');
+        // Emit user info to server for better tracking
+        newSocket.emit('userConnected', { userId: user._id || user.id, userName: user.name });
+      });
+
+      newSocket.on('disconnect', () => {
+        console.log('Socket disconnected');
+      });
+
+      newSocket.on('connect_error', (error) => {
+        console.error('Socket connection error:', error);
+      });
+
       setSocket(newSocket);
 
       return () => {
+        console.log('Cleaning up socket connection');
         newSocket.close();
       };
     }

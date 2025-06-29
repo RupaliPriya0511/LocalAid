@@ -46,3 +46,48 @@ body, html, #root {
 .read-the-docs {
   color: #888;
 }
+
+/* Mobile Responsive Improvements */
+@media (max-width: 768px) {
+  #root {
+    padding: 1rem;
+  }
+  
+  .card {
+    padding: 1em;
+  }
+  
+  /* Improve touch targets on mobile */
+  button, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better spacing for mobile */
+  .MuiContainer-root {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  
+  /* Improve text readability on mobile */
+  .MuiTypography-root {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+}
+
+@media (max-width: 480px) {
+  #root {
+    padding: 0.5rem;
+  }
+  
+  /* Stack elements vertically on very small screens */
+  .MuiBox-root {
+    flex-direction: column !important;
+  }
+  
+  /* Reduce padding on mobile */
+  .MuiPaper-root {
+    padding: 16px !important;
+  }
+}
