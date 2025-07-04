@@ -2,9 +2,9 @@ import React from 'react';
 import { Dialog, DialogTitle, DialogContent, Avatar, Typography, Box, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-// Helper to get full avatar URL
+const defaultAvatar = 'https://res.cloudinary.com/demo/image/upload/v1234567890/default_avatar.png';
 const getAvatarUrl = (avatar) => {
-  if (!avatar) return '';
+  if (!avatar) return defaultAvatar;
   return avatar.startsWith('/') ? `http://localhost:5000${avatar}` : avatar;
 };
 

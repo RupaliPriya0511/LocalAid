@@ -10,9 +10,9 @@ const typeColors = {
   Alert: 'error',
 };
 
-// Helper to get full avatar URL
+const defaultAvatar = 'https://res.cloudinary.com/demo/image/upload/v1234567890/default_avatar.png';
 const getAvatarUrl = (avatar) => {
-  if (!avatar) return '';
+  if (!avatar) return defaultAvatar;
   return avatar.startsWith('/') ? `http://localhost:5000${avatar}` : avatar;
 };
 
@@ -51,7 +51,7 @@ export default function ProfileSidebar({ user, stats, posts, onDeletePost, onEdi
         const res = await axios.post(`http://localhost:5000/api/users/${user._id || user.id}/avatar`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        setAvatarPreview(`http://localhost:5000${res.data.avatar}`);
+        setAvatarPreview(res.data.avatar);
         setEditFields(f => ({ ...f, avatar: res.data.avatar }));
       } catch (err) {
         console.error('Error uploading avatar:', err);
@@ -82,7 +82,7 @@ export default function ProfileSidebar({ user, stats, posts, onDeletePost, onEdi
       <Box display="flex" flexDirection="column" alignItems="center">
         <Box sx={{ position: 'relative', mb: 2 }}>
           <Avatar
-            src={getAvatarUrl(user.avatar)}
+            src={getAvatarUrl(avatarPreview || user.avatar)}
             sx={{
               width: 64,
               height: 64,

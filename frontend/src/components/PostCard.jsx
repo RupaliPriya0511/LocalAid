@@ -52,6 +52,23 @@ export default function PostCard({ post, onMessage, onHelpersClick, onAvatarClic
     }
   };
 
+  const defaultAvatar = 'https://res.cloudinary.com/demo/image/upload/v1234567890/default_avatar.png';
+  // const defaultPostImage = 'https://res.cloudinary.com/demo/image/upload/v1234567890/default_post.png';
+  const defaultPostImage = 'https://res.cloudinary.com/dnpawvfvy/image/upload/default_nn1ndo.png';
+  
+  const getAvatarUrl = (avatar) => {
+    if (!avatar) return defaultAvatar;
+    return avatar.startsWith('/') ? `http://localhost:5000${avatar}` : avatar;
+  };
+  const getPostImageUrl = (image) => {
+    if (!image) return defaultPostImage;
+    return image.startsWith('/uploads/') ? `http://localhost:5000${image}` : image;
+  };
+  const getVideoUrl = (video) => {
+    if (!video) return '';
+    return video.startsWith('/uploads/') ? `http://localhost:5000${video}` : video;
+  };
+
   // Handle both object and string user data
   const getUserData = () => {
     if (typeof post.user === 'object' && post.user !== null) {
@@ -105,7 +122,7 @@ export default function PostCard({ post, onMessage, onHelpersClick, onAvatarClic
               }}
             >
               <Avatar 
-                src={userData.avatar}
+                src={getAvatarUrl(userData.avatar)}
                 sx={{ 
                   width: 40, 
                   height: 40,
@@ -196,34 +213,20 @@ export default function PostCard({ post, onMessage, onHelpersClick, onAvatarClic
           {post.title}
         </Typography>
 
-        {/* Media Preview */}
-        {post.image ? (
-          <Box sx={{ mb: 2, width: '100%', display: 'flex', justifyContent: 'center' }}>
-            <img
-              src={post.image.startsWith('/uploads/') ? `http://localhost:5000${post.image}` : post.image}
-              alt="Post Media"
-              style={{ width: 220, height: 220, objectFit: 'cover', borderRadius: 12, display: 'block' }}
-            />
-          </Box>
-        ) : (
-          <Box sx={{ mb: 2, width: '100%', display: 'flex', justifyContent: 'center' }}>
-            <img
-              src={`http://localhost:5000/uploads/default.png`}
-              alt="No Media"
-              style={{ width: 220, height: 220, objectFit: 'cover', borderRadius: 12, opacity: 0.7, display: 'block' }}
-            />
-          </Box>
-        )}
-        {post.video && (
-          <Box sx={{ mb: 2, width: '100%', display: 'flex', justifyContent: 'center' }}>
+        {/* Media Preview - always reserve space for media */}
+        <Box sx={{ mb: 2, width: '100%', minHeight: 220, display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#f5f5f5', borderRadius: 2 }}>
+          {post.image ? (
+            <img src={getPostImageUrl(post.image)} alt="Post" style={{ width: '100%', borderRadius: 8, maxHeight: 220, objectFit: 'cover' }} />
+          ) : post.video ? (
             <video
-              src={post.video.startsWith('/uploads/') ? `http://localhost:5000${post.video}` : post.video}
+              src={getVideoUrl(post.video)}
               controls
-              style={{ width: 220, height: 220, objectFit: 'cover', borderRadius: 12, display: 'block' }}
+              style={{ width: '100%', borderRadius: 8, maxHeight: 220, objectFit: 'cover', background: '#000' }}
             />
-          </Box>
-        )}
-
+          ) : (
+            <img src={defaultPostImage} alt="No Media" style={{ width: '100%', borderRadius: 8, maxHeight: 220, objectFit: 'cover', opacity: 0.7 }} />
+          )}
+        </Box>
         <Typography 
           variant="body2" 
           color="text.secondary"
@@ -238,7 +241,6 @@ export default function PostCard({ post, onMessage, onHelpersClick, onAvatarClic
         >
           {post.description}
         </Typography>
-
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, color: 'text.secondary' }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <LocationIcon sx={{ fontSize: 16, mr: 0.5 }} />
@@ -254,7 +256,6 @@ export default function PostCard({ post, onMessage, onHelpersClick, onAvatarClic
           </Box>
         </Box>
       </CardContent>
-
       <CardActions sx={{ p: 2, pt: 0 }}>
         <Button
           variant="contained"

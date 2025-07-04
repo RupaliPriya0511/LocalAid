@@ -16,14 +16,14 @@ export default function Header({ user, socket, onNotificationAction }) {
         window.location.reload();
     };
 
-    // Helper to get full avatar URL
+    const defaultAvatar = 'https://res.cloudinary.com/demo/image/upload/v1234567890/default_avatar.png';
     const getAvatarUrl = (avatar) => {
-        if (!avatar) return '';
+        if (!avatar) return defaultAvatar;
         return avatar.startsWith('/') ? `http://localhost:5000${avatar}` : avatar;
     };
 
     return (
-        <AppBar position="static" color="inherit" elevation={1} sx={{ width: "100vw", left: 0 }}>
+        <AppBar position="fixed" color="inherit" elevation={1} sx={{ width: "100vw", left: 0, zIndex: 1201 }}>
             <Toolbar>
                 <Typography variant="h6" sx={{ flexGrow: 1, color: "#1976d2", fontWeight: 700 }}>
                     LocalAid

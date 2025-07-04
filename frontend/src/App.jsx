@@ -76,6 +76,7 @@ import io from 'socket.io-client';
 import AuthPage from './pages/AuthPage';
 import Home from './pages/Home';
 import { Box, CssBaseline } from '@mui/material';
+import Header from './components/Header';
 
 // Utility to normalize avatar URL
 const normalizeUserAvatar = (user) => {
@@ -164,9 +165,11 @@ function App() {
           sx={{
             flexGrow: 1,
             width: '100%',
-            backgroundColor: 'background.default'
+            backgroundColor: 'background.default',
+            pt: 8
           }}
         >
+          <Header user={user} onLogout={handleLogout} />
           <Routes>
             <Route path="/" element={<Home user={user} socket={socket} onLogout={handleLogout} />} />
             <Route path="*" element={<Navigate to="/" replace />} />

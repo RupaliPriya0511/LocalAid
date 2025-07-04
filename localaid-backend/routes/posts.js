@@ -4,17 +4,18 @@ const Post = require('../models/Post');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
 const multer = require('multer');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const { cloudinary } = require('../utils/cloudinary');
 const path = require('path');
 
 // Multer setup
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../uploads/'));
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'localaid_posts',
+    allowed_formats: ['jpg', 'png', 'jpeg', 'mp4', 'mov'],
+    resource_type: 'auto', // allows both images and videos
   },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + '-' + file.originalname);
-  }
 });
 const upload = multer({ storage });
 
@@ -50,16 +51,13 @@ router.get('/', async (req, res) => {
 router.post('/', upload.single('media'), async (req, res) => {
   try {
     const { longitude, latitude, ...postData } = req.body;
-    let fileUrl = '';
     let image = '';
     let video = '';
     if (req.file) {
-      fileUrl = `/uploads/${req.file.filename}`;
-      // Check file type
       if (req.file.mimetype.startsWith('image/')) {
-        image = fileUrl;
+        image = req.file.path;
       } else if (req.file.mimetype.startsWith('video/')) {
-        video = fileUrl;
+        video = req.file.path;
       }
     }
     const post = new Post({
