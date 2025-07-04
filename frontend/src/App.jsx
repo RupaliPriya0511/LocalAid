@@ -83,7 +83,7 @@ const normalizeUserAvatar = (user) => {
   if (!user) return user;
   let avatar = user.avatar;
   if (avatar && avatar.startsWith('/')) {
-    avatar = `http://localhost:5000${avatar}`;
+    avatar = `https://localaid.onrender.com${avatar}`;
   }
   // Always ensure 'id' is present
   const id = user.id || user._id;
@@ -102,7 +102,7 @@ function App() {
 
   useEffect(() => {
     if (user) {
-      const newSocket = io('http://localhost:5000', {
+      const newSocket = io('https://localaid.onrender.com', {
         transports: ['websocket', 'polling'],
         reconnection: true,
         reconnectionAttempts: 5,

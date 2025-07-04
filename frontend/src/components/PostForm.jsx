@@ -180,7 +180,7 @@ export default function PostForm({ type = 'Help', onPostCreated, onCancel, user,
         formData.append('media', media);
       }
 
-      const res = await axios.post('http://localhost:5000/api/posts', formData, {
+      const res = await axios.post('https://localaid.onrender.com/api/posts', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

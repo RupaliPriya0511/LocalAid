@@ -58,15 +58,15 @@ export default function PostCard({ post, onMessage, onHelpersClick, onAvatarClic
   
   const getAvatarUrl = (avatar) => {
     if (!avatar) return defaultAvatar;
-    return avatar.startsWith('/') ? `http://localhost:5000${avatar}` : avatar;
+    return avatar.startsWith('/') ? `https://localaid.onrender.com${avatar}` : avatar;
   };
   const getPostImageUrl = (image) => {
     if (!image) return defaultPostImage;
-    return image.startsWith('/uploads/') ? `http://localhost:5000${image}` : image;
+    return image.startsWith('/uploads/') ? `https://localaid.onrender.com${image}` : image;
   };
   const getVideoUrl = (video) => {
     if (!video) return '';
-    return video.startsWith('/uploads/') ? `http://localhost:5000${video}` : video;
+    return video.startsWith('/uploads/') ? `https://localaid.onrender.com${video}` : video;
   };
 
   // Handle both object and string user data
@@ -176,7 +176,7 @@ export default function PostCard({ post, onMessage, onHelpersClick, onAvatarClic
                 sx={{ ml: 1, height: 32, borderRadius: 2, minWidth: 64, px: 2, textTransform: 'none', fontWeight: 600 }}
                 onClick={async () => {
                   try {
-                    await axios.patch(`http://localhost:5000/api/posts/${post._id}/status`, { status: 'closed' });
+                    await axios.patch(`https://localaid.onrender.com/api/posts/${post._id}/status`, { status: 'closed' });
                     if (typeof onPostUpdate === 'function') onPostUpdate();
                   } catch (err) {
                     console.error('Error closing post:', err);
@@ -196,7 +196,7 @@ export default function PostCard({ post, onMessage, onHelpersClick, onAvatarClic
                 sx={{ ml: 1, height: 32, borderRadius: 2, minWidth: 64, px: 2, textTransform: 'none', fontWeight: 600 }}
                 onClick={async () => {
                   try {
-                    await axios.patch(`http://localhost:5000/api/posts/${post._id}/status`, { status: 'open' });
+                    await axios.patch(`https://localaid.onrender.com/api/posts/${post._id}/status`, { status: 'open' });
                     if (typeof onPostUpdate === 'function') onPostUpdate();
                   } catch (err) {
                     console.error('Error reopening post:', err);

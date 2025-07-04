@@ -25,7 +25,7 @@ export default function AuthPage({ onAuthSuccess }) {
     try {
       if (tab === 1) {
         // Register
-        await axios.post('http://localhost:5000/api/auth/register', {
+        await axios.post('https://localaid.onrender.com/api/auth/register', {
           name: form.name,
           email: form.email,
           password: form.password,
@@ -35,7 +35,7 @@ export default function AuthPage({ onAuthSuccess }) {
         setForm({ name: '', email: '', password: '' });
       } else {
         // Login
-        const res = await axios.post('http://localhost:5000/api/auth/login', {
+        const res = await axios.post('https://localaid.onrender.com/api/auth/login', {
           email: form.email,
           password: form.password,
         });

@@ -4,8 +4,8 @@ import CloseIcon from '@mui/icons-material/Close';
 
 const defaultAvatar = 'https://res.cloudinary.com/demo/image/upload/v1234567890/default_avatar.png';
 const getAvatarUrl = (avatar) => {
-  if (!avatar) return defaultAvatar;
-  return avatar.startsWith('/') ? `http://localhost:5000${avatar}` : avatar;
+  if (!avatar) return '';
+  return avatar.startsWith('/') ? `https://localaid.onrender.com${avatar}` : avatar;
 };
 
 export default function UserProfileModal({ open, onClose, user }) {

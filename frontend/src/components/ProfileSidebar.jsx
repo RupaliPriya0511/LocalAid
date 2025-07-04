@@ -13,7 +13,7 @@ const typeColors = {
 const defaultAvatar = 'https://res.cloudinary.com/demo/image/upload/v1234567890/default_avatar.png';
 const getAvatarUrl = (avatar) => {
   if (!avatar) return defaultAvatar;
-  return avatar.startsWith('/') ? `http://localhost:5000${avatar}` : avatar;
+  return avatar.startsWith('/') ? `https://localaid.onrender.com${avatar}` : avatar;
 };
 
 export default function ProfileSidebar({ user, stats, posts, onDeletePost, onEditProfile }) {
@@ -48,7 +48,7 @@ export default function ProfileSidebar({ user, stats, posts, onDeletePost, onEdi
       const formData = new FormData();
       formData.append('avatar', file);
       try {
-        const res = await axios.post(`http://localhost:5000/api/users/${user._id || user.id}/avatar`, formData, {
+        const res = await axios.post(`https://localaid.onrender.com/api/users/${user._id || user.id}/avatar`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
         setAvatarPreview(res.data.avatar);

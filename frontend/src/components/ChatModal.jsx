@@ -18,7 +18,7 @@ import SendIcon from '@mui/icons-material/Send';
 import axios from 'axios';
 import io from 'socket.io-client';
 
-const SOCKET_URL = 'http://localhost:5000';
+const SOCKET_URL = 'https://localaid.onrender.com';
 
 export default function ChatModal({ open, onClose, post, currentUser, chatTarget }) {
   const theme = useTheme();
@@ -75,7 +75,7 @@ export default function ChatModal({ open, onClose, post, currentUser, chatTarget
     // Fetch previous messages
     const fetchMessages = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/messages/${post._id}`, {
+        const response = await axios.get(`https://localaid.onrender.com/api/messages/${post._id}`, {
           params: {
             userA: chatTarget || (typeof post.user === 'object' ? post.user.name : post.user),
             userB: typeof currentUser === 'object' ? currentUser.name : currentUser

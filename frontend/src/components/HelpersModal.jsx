@@ -32,13 +32,13 @@ export default function HelpersModal({ open, onClose, post, currentUser, onChatO
   const fetchHelpers = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`http://localhost:5000/api/helpers/post/${post._id}`);
+      const res = await axios.get(`https://localaid.onrender.com/api/helpers/post/${post._id}`);
       
       // Fetch full user object for each helper
       const helpersWithUser = await Promise.all(
         res.data.map(async (helper) => {
           try {
-            const userRes = await axios.get(`http://localhost:5000/api/users/${helper.helperId}`);
+            const userRes = await axios.get(`https://localaid.onrender.com/api/users/${helper.helperId}`);
             return { ...helper, user: userRes.data };
           } catch (err) {
             console.error(`Failed to fetch user ${helper.helperId}`, err);
@@ -75,7 +75,7 @@ export default function HelpersModal({ open, onClose, post, currentUser, onChatO
 
 const handleAddHelper = async () => {
     try {
-      await axios.post('http://localhost:5000/api/helpers', {
+      await axios.post('https://localaid.onrender.com/api/helpers', {
         postId: post._id,
         helperId: currentUser.id,
         helperName: currentUser.name,
@@ -91,7 +91,7 @@ const handleAddHelper = async () => {
 
   const handleRemoveHelper = async (helperId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/helpers/${helperId}`);
+      await axios.delete(`https://localaid.onrender.com/api/helpers/${helperId}`);
       setHelpers(helpers.filter(h => h._id !== helperId));
       setError(null);
     } catch (err) {

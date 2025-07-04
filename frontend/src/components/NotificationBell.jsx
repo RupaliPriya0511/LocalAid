@@ -58,7 +58,7 @@ export default function NotificationBell({ socket, currentUser, onNotificationAc
     if (!currentUser) return;
     
     try {
-      const response = await axios.get(`http://localhost:5000/api/notifications/${currentUser.name}`);
+      const response = await axios.get(`https://localaid.onrender.com/api/notifications/${currentUser.name}`);
       setNotifications(response.data);
       updateUnreadCount(response.data);
     } catch (error) {
@@ -81,7 +81,7 @@ export default function NotificationBell({ socket, currentUser, onNotificationAc
   const handleNotificationClick = async (notification) => {
     if (!notification.read) {
       try {
-        await axios.put('http://localhost:5000/api/notifications/read', {
+        await axios.put('https://localaid.onrender.com/api/notifications/read', {
           notificationIds: [notification._id]
         });
         setNotifications(prev =>

@@ -19,7 +19,7 @@ export default function Header({ user, socket, onNotificationAction }) {
     const defaultAvatar = 'https://res.cloudinary.com/demo/image/upload/v1234567890/default_avatar.png';
     const getAvatarUrl = (avatar) => {
         if (!avatar) return defaultAvatar;
-        return avatar.startsWith('/') ? `http://localhost:5000${avatar}` : avatar;
+        return avatar.startsWith('/') ? `https://localaid.onrender.com${avatar}` : avatar;
     };
 
     return (

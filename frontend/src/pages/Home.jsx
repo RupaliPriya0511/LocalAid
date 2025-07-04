@@ -37,7 +37,7 @@ export default function Home({ user, socket }) {
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      let url = 'http://localhost:5000/api/posts';
+      let url = 'https://localaid.onrender.com/api/posts';
       if (location) {
         url += `?latitude=${location.latitude}&longitude=${location.longitude}`;
       }
@@ -114,7 +114,7 @@ export default function Home({ user, socket }) {
       let post = posts.find(p => p._id === notification.postId);
       if (!post) {
         try {
-          const res = await axios.get(`http://localhost:5000/api/posts/${notification.postId}`);
+          const res = await axios.get(`https://localaid.onrender.com/api/posts/${notification.postId}`);
           post = res.data;
         } catch (err) {
           console.error('Could not fetch post for chat:', err);
@@ -225,7 +225,7 @@ export default function Home({ user, socket }) {
 
   const handleDeletePost = async (postId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/posts/${postId}`);
+      await axios.delete(`https://localaid.onrender.com/api/posts/${postId}`);
       // Update posts state immediately without refetching
       setPosts(prevPosts => prevPosts.filter(post => post._id !== postId));
       setSnackbar({ open: true, message: 'Post deleted successfully!', severity: 'success' });
@@ -240,7 +240,7 @@ export default function Home({ user, socket }) {
     if (!user) return user;
     let avatar = user.avatar;
     if (avatar && avatar.startsWith('/')) {
-      avatar = `http://localhost:5000${avatar}`;
+      avatar = `https://localaid.onrender.com${avatar}`;
     }
     // Always ensure 'id' is present
     const id = user.id || user._id;
@@ -251,7 +251,7 @@ export default function Home({ user, socket }) {
     try {
       console.log('DEBUG userState:', userState);
       const userId = userState._id || userState.id;
-      const res = await axios.patch(`http://localhost:5000/api/users/${userId}`, updated);
+      const res = await axios.patch(`https://localaid.onrender.com/api/users/${userId}`, updated);
       const normalized = normalizeUserAvatar(res.data);
       setUserState(normalized);
       localStorage.setItem('user', JSON.stringify(normalized));
