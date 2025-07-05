@@ -16,7 +16,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: process.env.NODE_ENV === 'production' 
-      ? ['https://localaid.netlify.app', 'http://localhost:5173', 'http://localhost:3000'] // Allow both production and localhost for testing
+      ? ['https://local-aid.netlify.app', 'http://localhost:5173', 'http://localhost:3000'] // Allow both production and localhost for testing
       : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5000'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
@@ -28,7 +28,7 @@ app.set('io', io);
 
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://localaid.netlify.app', 'http://localhost:5173', 'http://localhost:3000'] // Allow both production and localhost for testing
+    ? ['https://local-aid.netlify.app', 'http://localhost:5173', 'http://localhost:3000'] // Allow both production and localhost for testing
     : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
