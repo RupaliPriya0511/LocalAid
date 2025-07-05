@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Box, Grid, Dialog, Alert, Container, Fade, Paper, Typography, useTheme, CircularProgress, Snackbar } from '@mui/material';
+import { Box, Grid, Dialog, Alert, Container, Fade, Paper, Typography, useTheme, CircularProgress, Snackbar, Drawer, IconButton } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import Header from '../components/Header';
 import FilterBar from '../components/FilterBar';
 import ActionButtons from '../components/ActionButtons';
@@ -13,6 +15,7 @@ import ProfileSidebar from '../components/ProfileSidebar';
 
 export default function Home({ user, socket }) {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [tab, setTab] = useState(0);
   const [posts, setPosts] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
@@ -32,6 +35,7 @@ export default function Home({ user, socket }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [userState, setUserState] = useState(user);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Define fetchPosts at the top level so it is available everywhere
   const fetchPosts = async () => {
@@ -336,15 +340,30 @@ export default function Home({ user, socket }) {
     <Box sx={{ 
       minHeight: '100vh',
       bgcolor: '#e0e3e8',
-      transition: 'all 0.3s ease-in-out'
+      transition: 'all 0.3s ease-in-out',
+      width: '100vw',
+      maxWidth: '100vw',
+      overflowX: 'hidden'
     }}>
-      <Header user={userState} socket={socket} onNotificationAction={handleNotificationAction} />
+      <Header user={userState} socket={socket} onNotificationAction={handleNotificationAction} onMenuClick={() => setSidebarOpen(true)} />
+      {isMobile ? (
+        <Drawer
+          anchor="left"
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          PaperProps={{ sx: { width: 280 } }}
+        >
+          <ProfileSidebar user={userState} stats={{ posts: posts.length, responses: 0 }} posts={myPosts} onDeletePost={handleDeletePost} onEditProfile={handleEditProfile} />
+        </Drawer>
+      ) : null}
       <Container maxWidth="xl" sx={{ py: { xs: 2, md: 4 } }}>
         <Grid container columns={12} spacing={{ xs: 2, md: 3 }}>
-          <Grid gridColumn={{ xs: 'span 12', lg: 'span 3' }}>
-            <ProfileSidebar user={userState} stats={{ posts: posts.length, responses: 0 }} posts={myPosts} onDeletePost={handleDeletePost} onEditProfile={handleEditProfile} />
-          </Grid>
-          <Grid gridColumn={{ xs: 'span 12', lg: 'span 9' }}>
+          {!isMobile && (
+            <Grid item lg={3} sx={{ display: { xs: 'none', lg: 'block' } }}>
+              <ProfileSidebar user={userState} stats={{ posts: posts.length, responses: 0 }} posts={myPosts} onDeletePost={handleDeletePost} onEditProfile={handleEditProfile} />
+            </Grid>
+          )}
+          <Grid item xs={12} lg={9}>
             <Fade in={true} timeout={800}>
               <Box>
                 {locationError && (

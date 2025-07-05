@@ -77,6 +77,7 @@ import AuthPage from './pages/AuthPage';
 import Home from './pages/Home';
 import { Box, CssBaseline } from '@mui/material';
 import Header from './components/Header';
+import Footer from './components/Footer';
 
 // Utility to normalize avatar URL
 const normalizeUserAvatar = (user) => {
@@ -174,6 +175,7 @@ function App() {
             <Route path="/" element={<Home user={user} socket={socket} onLogout={handleLogout} />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          <Footer />
         </Box>
       </Box>
     </Router>
