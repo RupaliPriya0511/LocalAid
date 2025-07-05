@@ -68,7 +68,7 @@ export default function ProfileSidebar({ user, stats, posts, onDeletePost, onEdi
   if (!user) return null;
   return (
     <Card sx={{
-      mt: 8,
+      mt: { xs: 8, sm: 0 },
       p: { xs: 1.5, sm: 3 },
       borderRadius: 3,
       mb: 3,
