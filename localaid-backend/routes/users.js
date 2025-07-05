@@ -38,6 +38,23 @@ router.patch('/:id', async (req, res) => {
       { new: true }
     );
     if (!user) return res.status(404).json({ error: 'User not found' });
+    
+    // Emit WebSocket event for profile update
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('userProfileUpdated', {
+        userId: user._id,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          locationName: user.locationName
+        }
+      });
+      console.log(`Profile update event emitted for user: ${user.name}`);
+    }
+    
     res.json(user);
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
@@ -55,6 +72,23 @@ router.post('/:id/avatar', upload.single('avatar'), async (req, res) => {
       { new: true }
     );
     if (!user) return res.status(404).json({ error: 'User not found' });
+    
+    // Emit WebSocket event for avatar update
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('userProfileUpdated', {
+        userId: user._id,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          locationName: user.locationName
+        }
+      });
+      console.log(`Avatar update event emitted for user: ${user.name}`);
+    }
+    
     res.json(user);
   } catch (err) {
     res.status(500).json({ error: 'Server error' });

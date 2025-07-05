@@ -15,14 +15,22 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*', // For dev, allow all. For prod, restrict to your frontend URL.
-    methods: ['GET', 'POST']
+    origin: process.env.NODE_ENV === 'production' 
+      ? ['https://your-frontend-domain.com', 'http://localhost:3000'] // Add your frontend domain
+      : '*',
+    methods: ['GET', 'POST'],
+    credentials: true
   }
 });
 
 app.set('io', io);
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://your-frontend-domain.com', 'http://localhost:3000'] // Add your frontend domain
+    : '*',
+  credentials: true
+}));
 app.use(express.json());
 
 // Serve uploads folder
@@ -56,6 +64,13 @@ io.on('connection', (socket) => {
   socket.on('authenticate', (username) => {
     userSockets.set(username, socket.id);
     console.log(`User ${username} authenticated with socket ${socket.id}`);
+  });
+
+  // Handle user connection
+  socket.on('userConnected', (userData) => {
+    console.log('User connected event received:', userData);
+    userSockets.set(userData.userName, socket.id);
+    console.log(`User ${userData.userName} connected with socket ${socket.id}`);
   });
 
   // Handle chat rooms
