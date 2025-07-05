@@ -16,8 +16,8 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: process.env.NODE_ENV === 'production' 
-      ? ['https://your-frontend-domain.com'] // Replace with your actual frontend domain
-      : '*',
+      ? ['https://localaid.netlify.app', 'http://localhost:5173', 'http://localhost:3000'] // Allow both production and localhost for testing
+      : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5000'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -28,8 +28,8 @@ app.set('io', io);
 
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-frontend-domain.com'] // Replace with your actual frontend domain
-    : '*',
+    ? ['https://localaid.netlify.app', 'http://localhost:5173', 'http://localhost:3000'] // Allow both production and localhost for testing
+    : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
