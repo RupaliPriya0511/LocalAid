@@ -21,7 +21,7 @@ export default function Header({ user, socket, onNotificationAction, onMenuClick
         window.location.reload();
     };
 
-    const defaultAvatar = 'https://res.cloudinary.com/demo/image/upload/v1234567890/default_avatar.png';
+    const defaultAvatar = 'https://ui-avatars.com/api/?name=User&background=cccccc&color=666666';
     const getAvatarUrl = (avatar) => {
         if (!avatar) return defaultAvatar;
         return avatar.startsWith('/') ? `https://localaid.onrender.com${avatar}` : avatar;

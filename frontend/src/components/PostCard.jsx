@@ -52,7 +52,7 @@ export default function PostCard({ post, onMessage, onHelpersClick, onAvatarClic
     }
   };
 
-  const defaultAvatar = 'https://res.cloudinary.com/demo/image/upload/v1234567890/default_avatar.png';
+  const defaultAvatar = 'https://ui-avatars.com/api/?name=User&background=cccccc&color=666666';
   // const defaultPostImage = 'https://res.cloudinary.com/demo/image/upload/v1234567890/default_post.png';
   const defaultPostImage = 'https://res.cloudinary.com/dnpawvfvy/image/upload/default_nn1ndo.png';
   

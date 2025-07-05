@@ -2,7 +2,7 @@ import React from 'react';
 import { Dialog, DialogTitle, DialogContent, Avatar, Typography, Box, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-const defaultAvatar = 'https://res.cloudinary.com/demo/image/upload/v1234567890/default_avatar.png';
+const defaultAvatar = 'https://ui-avatars.com/api/?name=User&background=cccccc&color=666666';
 const getAvatarUrl = (avatar) => {
   if (!avatar) return '';
   return avatar.startsWith('/') ? `https://localaid.onrender.com${avatar}` : avatar;

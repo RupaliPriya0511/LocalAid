@@ -13,7 +13,7 @@ import UserProfileModal from '../components/UserProfileModal';
 import HelpersModal from '../components/HelpersModal';
 import ProfileSidebar from '../components/ProfileSidebar';
 
-export default function Home({ user, socket }) {
+export default function Home({ user, socket, onUserUpdate }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [tab, setTab] = useState(0);
@@ -80,6 +80,11 @@ export default function Home({ user, socket }) {
   useEffect(() => {
     fetchPosts();
   }, [location]);
+
+  // Sync userState with user prop when it changes
+  useEffect(() => {
+    setUserState(user);
+  }, [user]);
 
   // When avatar is clicked:
   const handleAvatarClick = (user) => {
@@ -259,6 +264,12 @@ export default function Home({ user, socket }) {
       const normalized = normalizeUserAvatar(res.data);
       setUserState(normalized);
       localStorage.setItem('user', JSON.stringify(normalized));
+      
+      // Update parent component's user state for real-time updates
+      if (onUserUpdate) {
+        onUserUpdate(normalized);
+      }
+      
       setSnackbar({ open: true, message: 'Profile updated successfully!', severity: 'success' });
     } catch (err) {
       setSnackbar({ open: true, message: 'Failed to update profile', severity: 'error' });
@@ -293,18 +304,35 @@ export default function Home({ user, socket }) {
       setPosts(prevPosts => prevPosts.filter(post => post._id !== postId));
     };
 
+    // Listen for user profile updates from other devices
+    const handleUserProfileUpdated = (data) => {
+      console.log('Profile update received in Home component:', data);
+      // Check if this update is for the current user
+      if (data.userId === user._id || data.userId === user.id) {
+        console.log('Updating userState from WebSocket event in Home');
+        const normalized = normalizeUserAvatar(data.user);
+        setUserState(normalized);
+        // Also update parent component if callback exists
+        if (onUserUpdate) {
+          onUserUpdate(normalized);
+        }
+      }
+    };
+
     socket.on('postsUpdated', handleUpdate);
     socket.on('postCreated', handlePostCreated);
     socket.on('postUpdated', handlePostUpdated);
     socket.on('postDeleted', handlePostDeleted);
+    socket.on('userProfileUpdated', handleUserProfileUpdated);
     
     return () => {
       socket.off('postsUpdated', handleUpdate);
       socket.off('postCreated', handlePostCreated);
       socket.off('postUpdated', handlePostUpdated);
       socket.off('postDeleted', handlePostDeleted);
+      socket.off('userProfileUpdated', handleUserProfileUpdated);
     };
-  }, [socket]);
+  }, [socket, user, onUserUpdate]);
 
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
@@ -344,8 +372,8 @@ export default function Home({ user, socket }) {
       width: '100vw',
       maxWidth: '100vw',
       overflowX: 'hidden'
-    }}>
-      <Header user={userState} socket={socket} onNotificationAction={handleNotificationAction} onMenuClick={() => setSidebarOpen(true)} />
+          }}>
+      <Header user={user} socket={socket} onNotificationAction={handleNotificationAction} onMenuClick={() => setSidebarOpen(true)} />
       {isMobile ? (
         <Drawer
           anchor="left"
@@ -353,7 +381,9 @@ export default function Home({ user, socket }) {
           onClose={() => setSidebarOpen(false)}
           PaperProps={{ sx: { width: 280 } }}
         >
-          <ProfileSidebar user={userState} stats={{ posts: posts.length, responses: 0 }} posts={myPosts} onDeletePost={handleDeletePost} onEditProfile={handleEditProfile} />
+          <Box sx={{ height: '100vh', overflowY: 'auto' }}>
+            <ProfileSidebar user={userState} stats={{ posts: posts.length, responses: 0 }} posts={myPosts} onDeletePost={handleDeletePost} onEditProfile={handleEditProfile} />
+          </Box>
         </Drawer>
       ) : null}
       <Container maxWidth="xl" sx={{ py: { xs: 2, md: 4 } }}>

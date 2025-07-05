@@ -76,15 +76,15 @@ import io from 'socket.io-client';
 import AuthPage from './pages/AuthPage';
 import Home from './pages/Home';
 import { Box, CssBaseline } from '@mui/material';
-import Header from './components/Header';
 import Footer from './components/Footer';
+import { BACKEND_URL } from './config';
 
 // Utility to normalize avatar URL
 const normalizeUserAvatar = (user) => {
   if (!user) return user;
   let avatar = user.avatar;
   if (avatar && avatar.startsWith('/')) {
-    avatar = `https://localaid.onrender.com${avatar}`;
+    avatar = `${BACKEND_URL}${avatar}`;
   }
   // Always ensure 'id' is present
   const id = user.id || user._id;
@@ -103,7 +103,7 @@ function App() {
 
   useEffect(() => {
     if (user) {
-      const newSocket = io('https://localaid.onrender.com', {
+      const newSocket = io(BACKEND_URL, {
         transports: ['websocket', 'polling'],
         reconnection: true,
         reconnectionAttempts: 5,
@@ -125,6 +125,28 @@ function App() {
         console.error('Socket connection error:', error);
       });
 
+      // Listen for user profile updates from other devices
+      newSocket.on('userProfileUpdated', (data) => {
+        console.log('Profile update received via WebSocket:', data);
+        console.log('Current user ID:', user._id || user.id);
+        console.log('Event user ID:', data.userId);
+        console.log('User IDs match?', (data.userId === user._id || data.userId === user.id));
+        
+        // Check if this update is for the current user
+        if (data.userId === user._id || data.userId === user.id) {
+          console.log('Updating current user profile from WebSocket event');
+          const normalized = normalizeUserAvatar(data.user);
+          console.log('Normalized user data:', normalized);
+          setUser(normalized);
+          localStorage.setItem('user', JSON.stringify(normalized));
+          console.log('User state updated successfully');
+        } else {
+          console.log('WebSocket event not for current user');
+        }
+      });
+
+
+
       setSocket(newSocket);
 
       return () => {
@@ -139,6 +161,15 @@ function App() {
     setUser(normalized);
     localStorage.setItem('user', JSON.stringify(normalized));
   };
+
+  // Add callback to update user state from child components
+  const handleUserUpdate = (updatedUser) => {
+    const normalized = normalizeUserAvatar(updatedUser);
+    setUser(normalized);
+    localStorage.setItem('user', JSON.stringify(normalized));
+  };
+
+
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -170,9 +201,9 @@ function App() {
             pt: 8
           }}
         >
-          <Header user={user} onLogout={handleLogout} />
+
           <Routes>
-            <Route path="/" element={<Home user={user} socket={socket} onLogout={handleLogout} />} />
+            <Route path="/" element={<Home user={user} socket={socket} onLogout={handleLogout} onUserUpdate={handleUserUpdate} />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
           <Footer />
