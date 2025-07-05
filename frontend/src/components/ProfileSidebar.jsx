@@ -68,6 +68,7 @@ export default function ProfileSidebar({ user, stats, posts, onDeletePost, onEdi
   if (!user) return null;
   return (
     <Card sx={{
+      mt: 8,
       p: { xs: 1.5, sm: 3 },
       borderRadius: 3,
       mb: 3,
@@ -84,10 +85,16 @@ export default function ProfileSidebar({ user, stats, posts, onDeletePost, onEdi
           <Avatar
             src={getAvatarUrl(avatarPreview || user.avatar)}
             sx={{
-              width: 64,
-              height: 64,
+              width: 80,
+              height: 80,
+              borderRadius: '50%',
+              objectFit: 'cover',
+              border: '3px solid #fff',
               boxShadow: 2,
+              mt: 1,
+              mb: 2,
               transition: 'transform 0.2s',
+              backgroundColor: '#f0f0f0',
               '&:hover': { transform: 'scale(1.08)' }
             }}
           />
